@@ -1,0 +1,16 @@
+# Environment Secrets
+.env
+*.env
+.env.local
+
+# Target & Maven Builds
+target/
+*.class
+*.jar
+*.war
+
+# IDE & OS
+.DS_Store
+.vscode/
+.idea/
+*.iml
