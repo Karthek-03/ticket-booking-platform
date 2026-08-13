@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Ticket Booking System</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo" onclick="showView('homeView')">
+                <span>🎟️ Simple Ticket Booking</span>
+            </a>
+
+            <nav class="nav-links">
+                <span class="nav-link" onclick="showView('homeView')">Home</span>
+                <span class="nav-link" onclick="showView('eventsView')">Events</span>
+                <span class="nav-link user-only" onclick="showView('myBookingsView')" style="display:none;">My Bookings</span>
+                <span class="nav-link admin-only" onclick="showView('adminView')" style="display:none;">Admin Dashboard</span>
+            </nav>
+
+            <div class="nav-actions">
+                <span id="userGreeting" style="font-size:0.9rem; font-weight:600; display:none;"></span>
+                <button id="loginNavBtn" class="btn btn-secondary btn-sm" onclick="openModal('loginModal')">Login</button>
+                <button id="registerNavBtn" class="btn btn-primary btn-sm" onclick="openModal('registerModal')">Register</button>
+                <button id="logoutNavBtn" class="btn btn-secondary btn-sm" onclick="handleLogout()" style="display:none;">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- Home Landing View -->
+        <section id="homeView" class="view-section active">
+            <div class="hero-banner">
+                <h1 class="hero-title">Simple Ticket Booking System</h1>
+                <p class="hero-subtitle">Find and book your favorite tech conferences, concerts, movies, stand-up comedy, and sports championships.</p>
+                <button class="btn btn-primary" onclick="showView('eventsView')">Browse Available Events</button>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 1.5rem;">Featured Events</h2>
+                <div id="featuredEventsGrid" class="events-grid">
+                    <!-- Featured Event Cards JS Injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Catalog View -->
+        <section id="eventsView" class="view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                <h2>Available Events</h2>
+                <div style="display:flex; gap:0.5rem; max-width:350px; width:100%;">
+                    <input type="text" id="eventSearchInput" class="form-control" placeholder="Search event or city..." onkeyup="filterEvents()" />
+                </div>
+            </div>
+
+            <div id="allEventsGrid" class="events-grid">
+                <!-- Events Grid JS Injected -->
+            </div>
+        </section>
+
+        <!-- My Bookings View -->
+        <section id="myBookingsView" class="view-section">
+            <h2 style="margin-bottom: 1.5rem;">My Bookings</h2>
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking Ref</th>
+                            <th>Event</th>
+                            <th>Date & Time</th>
+                            <th>Tickets</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myBookingsTableBody">
+                        <!-- Bookings rows JS Injected -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard View -->
+        <section id="adminView" class="view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                <h2>Admin Dashboard</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModal('createEventModal')">+ Add New Event</button>
+            </div>
+
+            <!-- Metrics Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Events</div>
+                    <div id="metricEvents" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Users</div>
+                    <div id="metricUsers" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Bookings</div>
+                    <div id="metricBookings" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Tickets Sold</div>
+                    <div id="metricTickets" class="metric-value">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Revenue</div>
+                    <div id="metricRevenue" class="metric-value">₹0</div>
+                </div>
+            </div>
+
+            <!-- Manage Events Table -->
+            <h3 style="margin-bottom: 1rem;">Manage Events</h3>
+            <div class="data-table-container" style="margin-bottom: 3rem;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Location</th>
+                            <th>Date & Time</th>
+                            <th>Total Seats</th>
+                            <th>Available</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminEventsTableBody">
+                        <!-- Admin events rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Manage Bookings Table -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3>Manage Bookings</h3>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="loadAdminBookings(null)">All</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadAdminBookings('CONFIRMED')">Confirmed</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadAdminBookings('CANCELLED')">Cancelled</button>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Booking Ref</th>
+                            <th>User</th>
+                            <th>Event</th>
+                            <th>Tickets</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBookingsTableBody">
+                        <!-- Admin bookings rows -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Login -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>User Login</h3>
+                <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="loginEmail" class="form-control" required placeholder="user@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Register -->
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Account</h3>
+                <button class="close-btn" onclick="closeModal('registerModal')">&times;</button>
+            </div>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="regName" class="form-control" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="regEmail" class="form-control" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="regPassword" class="form-control" required minlength="6" placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Event Booking Detail -->
+    <div id="bookingModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bookModalEventTitle">Book Event Tickets</h3>
+                <button class="close-btn" onclick="closeModal('bookingModal')">&times;</button>
+            </div>
+            <div id="bookModalEventMeta" style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.5rem;"></div>
+
+            <div class="quantity-control">
+                <span class="form-label" style="margin:0;">Tickets:</span>
+                <button type="button" class="quantity-btn" onclick="updateQuantity(-1)">-</button>
+                <span id="ticketQuantity" style="font-size:1.2rem; font-weight:700; width:30px; text-align:center;">1</span>
+                <button type="button" class="quantity-btn" onclick="updateQuantity(1)">+</button>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:800; margin:1.5rem 0;">
+                <span>Total Amount:</span>
+                <span id="bookingTotalAmount" style="color:var(--accent-primary);">₹0</span>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%;" onclick="submitBooking()">Book Ticket Now</button>
+        </div>
+    </div>
+
+    <!-- Modal: Booking Confirmation Result -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal-content" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🎉</div>
+            <h2 style="margin-bottom:0.5rem;">Booking Confirmed!</h2>
+            <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Your seats have been locked and reserved.</p>
+
+            <div style="background:var(--bg-main); padding:1.25rem; border-radius:var(--radius-md); text-align:left; font-size:0.9rem; margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span>Booking Reference:</span><strong id="confRef">TB-2026-XXXXX</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span>Event:</span><strong id="confEvent">Music Concert</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span>Tickets:</span><strong id="confQty">2</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span>Total Amount:</span><strong id="confAmount" style="color:var(--accent-primary);">₹1000</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Status:</span><span class="badge badge-success">CONFIRMED</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:1rem;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="window.print()">Print Confirmation</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="closeModal('confirmationModal'); showView('myBookingsView');">View My Bookings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Admin Create/Edit Event -->
+    <div id="createEventModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="eventModalTitle">Create New Event</h3>
+                <button class="close-btn" onclick="closeModal('createEventModal')">&times;</button>
+            </div>
+            <form onsubmit="handleSaveEvent(event)">
+                <input type="hidden" id="eventFormId" />
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="eventTitleInput" class="form-control" required placeholder="Tech Conference 2026">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="eventDescInput" class="form-control" rows="2" placeholder="Event details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" id="eventLocInput" class="form-control" required placeholder="Silicon Valley Convention Center">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="eventDateInput" class="form-control" required>
+                    </div>
+                    <div className="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="time" id="eventTimeInput" class="form-control" required>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Total Seats</label>
+                        <input type="number" id="eventSeatsInput" class="form-control" required min="1" placeholder="200">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" step="0.01" id="eventPriceInput" class="form-control" required min="0" placeholder="500">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Image URL</label>
+                    <input type="url" id="eventImageInput" class="form-control" placeholder="https://images.unsplash.com/...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
